@@ -4,7 +4,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
-require('dotenv').config({ path: './config.env' });
+// Load environment variables - try .env first, fallback to config.env for backward compatibility
+require('dotenv').config();
+if (!process.env.MONGODB_URI) {
+  require('dotenv').config({ path: './config.env' });
+}
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -19,14 +23,16 @@ const contactRoutes = require('./routes/contact');
 
 const app = express();
 
-// Add request logging
-app.use((req, res, next) => {
-  console.log(`=== INCOMING REQUEST ===`);
-  console.log(`Method: ${req.method}`);
-  console.log(`URL: ${req.url}`);
-  console.log(`Time: ${new Date().toISOString()}`);
-  next();
-});
+// Add request logging (only in development)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`=== INCOMING REQUEST ===`);
+    console.log(`Method: ${req.method}`);
+    console.log(`URL: ${req.url}`);
+    console.log(`Time: ${new Date().toISOString()}`);
+    next();
+  });
+}
 
 // Security middleware
 app.use(helmet({
@@ -42,17 +48,26 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173').split(',');
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173').split(',').map(origin => origin.trim());
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
+    // In production, be more strict; in development, allow localhost
+    if (process.env.NODE_ENV === 'production') {
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Development: allow localhost and allowed origins
+      if (origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true,
@@ -101,13 +116,18 @@ app.use('/api/contact', contactRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('=== GLOBAL ERROR HANDLER ===');
-  console.error('Error name:', err.name);
-  console.error('Error message:', err.message);
-  console.error('Error stack:', err.stack);
-  console.error('Error code:', err.code);
+  if (process.env.NODE_ENV === 'development') {
+    console.error('=== GLOBAL ERROR HANDLER ===');
+    console.error('Error name:', err.name);
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    console.error('Error code:', err.code);
+  } else {
+    // In production, log errors but don't expose details
+    console.error('Error:', err.message);
+  }
   
-  res.status(500).json({ 
+  res.status(err.status || 500).json({ 
     success: false, 
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
@@ -116,7 +136,9 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use('*', (req, res) => {
-  console.log('404 - Route not found:', req.originalUrl);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('404 - Route not found:', req.originalUrl);
+  }
   res.status(404).json({ 
     success: false, 
     message: 'Route not found' 

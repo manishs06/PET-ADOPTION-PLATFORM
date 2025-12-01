@@ -17,3 +17,15 @@ FourPaws is a comprehensive pet adoption platform that allows users to:
 - **Find and manage animal shelters** in the area
 
 The platform provides a seamless experience for both pet owners looking to find homes for their pets and individuals seeking to adopt a new companion.
+
+## Deployment
+
+This project is ready for deployment on various platforms including Render, Vercel, Railway, Heroku, and Netlify. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+### Quick Deploy
+
+1. Set up environment variables (see `.env.example` files in backend and frontend directories)
+2. Deploy backend to your preferred platform (Render, Railway, Heroku, etc.)
+3. Deploy frontend separately (Vercel, Netlify, or as static site)
+4. Update CORS settings in backend to include your frontend URL
+5. Configure MongoDB Atlas for production database

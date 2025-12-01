@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "FourPaws/backend/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "FourPaws/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "FourPaws/backend/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "FourPaws/frontend/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
+
