@@ -3,12 +3,10 @@ services:
     name: fourpaws-backend
     env: node
     plan: free
-    # Set root directory to backend folder
     rootDir: FourPaws/backend
-    # Build command: Install dependencies
     buildCommand: npm install
-    # Start command: Run the Node.js server
     startCommand: npm start
+    packageManager: npm
     envVars:
       - key: NODE_ENV
         value: production

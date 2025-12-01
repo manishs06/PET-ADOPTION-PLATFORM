@@ -55,22 +55,28 @@ VITE_Payment_Gateway_PK=your_stripe_publishable_key
    - Go to [Render Dashboard](https://dashboard.render.com)
    - Click "New +" → "Web Service"
    - Connect your GitHub repository
-   - **Option A: Using render.yaml (Recommended)**
-     - Render will automatically detect and use `render.yaml` from your repo
-     - All settings will be pre-configured
-     - Root directory is set to `FourPaws/backend`
-     - Build command: `npm install`
-     - Start command: `npm start`
-     - **Important:** Make sure `render.yaml` is in the root of your repository
-   - **Option B: Manual Setup**
-     - **Root Directory:** `FourPaws/backend` (recommended - makes commands simpler)
+   - **IMPORTANT: Manual Configuration Required**
+     - Even if you have `render.yaml`, you may need to manually configure these settings:
+     - **Root Directory:** `FourPaws/backend` ⚠️ **CRITICAL - Set this first!**
      - **Build Command:** `npm install`
-     - **Start Command:** `npm start` (if root directory is set) OR `cd FourPaws/backend && npm start`
+     - **Start Command:** `npm start`
      - **Environment:** Node
-     - **Note:** If you set Root Directory to `FourPaws/backend`, you can use just `npm start` instead of the full path
+     - **Auto-Deploy:** Yes (to deploy on every push)
+   - **Why manual setup?** Render sometimes doesn't auto-detect `render.yaml` or defaults to `yarn` instead of `npm`
    - Add all environment variables in the Render dashboard (see Environment Variables section above)
-   - Set **PORT** environment variable (Render provides this automatically, but ensure it's set)
-   - Deploy
+   - **Required Environment Variables:**
+     - `NODE_ENV=production`
+     - `PORT` (Render sets this automatically, but verify it's present)
+     - `MONGODB_URI` (your MongoDB connection string)
+     - `JWT_SECRET` (a strong random string)
+     - `JWT_EXPIRE=7d`
+     - `STRIPE_SECRET_KEY` (your Stripe secret key)
+     - `STRIPE_PUBLISHABLE_KEY` (your Stripe publishable key)
+     - `IMGBB_API_KEY` (your ImgBB API key)
+     - `FRONTEND_URL` (your frontend URL after deployment)
+     - `CORS_ORIGIN` (your frontend URL, can be same as FRONTEND_URL)
+     - `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` (for email notifications)
+   - Click "Create Web Service" to deploy
 
 2. **Deploy Frontend:**
    - Go to Render Dashboard
