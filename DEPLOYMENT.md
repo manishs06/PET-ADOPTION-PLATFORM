@@ -55,17 +55,29 @@ VITE_Payment_Gateway_PK=your_stripe_publishable_key
    - Go to [Render Dashboard](https://dashboard.render.com)
    - Click "New +" → "Web Service"
    - Connect your GitHub repository
-   - Use the `render.yaml` configuration file
-   - Add all environment variables in the Render dashboard
+   - **Option A: Using render.yaml (Recommended)**
+     - Render will automatically detect and use `render.yaml` from your repo
+     - All settings will be pre-configured
+     - The start command is already set: `cd FourPaws/backend && npm start`
+   - **Option B: Manual Setup**
+     - **Root Directory:** `FourPaws/backend` (recommended - makes commands simpler)
+     - **Build Command:** `npm install`
+     - **Start Command:** `npm start` (if root directory is set) OR `cd FourPaws/backend && npm start`
+     - **Environment:** Node
+     - **Note:** If you set Root Directory to `FourPaws/backend`, you can use just `npm start` instead of the full path
+   - Add all environment variables in the Render dashboard (see Environment Variables section above)
+   - Set **PORT** environment variable (Render provides this automatically, but ensure it's set)
    - Deploy
 
 2. **Deploy Frontend:**
    - Go to Render Dashboard
    - Click "New +" → "Static Site"
    - Connect your GitHub repository
-   - Build command: `cd FourPaws/frontend && npm install && npm run build`
-   - Publish directory: `FourPaws/frontend/dist`
-   - Add environment variables
+   - **Root Directory:** `FourPaws/frontend` (optional, but recommended)
+   - **Build Command:** `npm install && npm run build`
+   - **Publish Directory:** `dist` (if root directory is set) OR `FourPaws/frontend/dist`
+   - Add environment variables (VITE_API_BASE_URL, VITE_IMGBB_API_KEY, VITE_Payment_Gateway_PK)
+   - **Important:** Set `VITE_API_BASE_URL` to your deployed backend URL (e.g., `https://your-backend.onrender.com/api`)
    - Deploy
 
 ### Option 2: Vercel

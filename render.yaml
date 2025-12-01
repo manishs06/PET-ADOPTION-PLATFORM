@@ -3,7 +3,10 @@ services:
     name: fourpaws-backend
     env: node
     plan: free
+    # Build command: Install dependencies in the backend directory
     buildCommand: cd FourPaws/backend && npm install
+    # Start command: Run the Node.js server
+    # Alternative: Set rootDirectory to "FourPaws/backend" and use "npm start"
     startCommand: cd FourPaws/backend && npm start
     envVars:
       - key: NODE_ENV
