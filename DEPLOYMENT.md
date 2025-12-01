@@ -58,7 +58,10 @@ VITE_Payment_Gateway_PK=your_stripe_publishable_key
    - **Option A: Using render.yaml (Recommended)**
      - Render will automatically detect and use `render.yaml` from your repo
      - All settings will be pre-configured
-     - The start command is already set: `cd FourPaws/backend && npm start`
+     - Root directory is set to `FourPaws/backend`
+     - Build command: `npm install`
+     - Start command: `npm start`
+     - **Important:** Make sure `render.yaml` is in the root of your repository
    - **Option B: Manual Setup**
      - **Root Directory:** `FourPaws/backend` (recommended - makes commands simpler)
      - **Build Command:** `npm install`
