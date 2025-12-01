@@ -1,0 +1,26 @@
+{
+  "name": "pet-adoption-platform",
+  "version": "1.0.0",
+  "description": "Pet Adoption Platform - Full Stack Application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "install-all": "cd frontend && npm install && cd ../backend && npm install"
+  },
+  "keywords": [
+    "pet-adoption",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {}
+}
