@@ -1,0 +1,10 @@
+{
+  "name": "pet-adoption-platform",
+  "version": "1.0.0",
+  "description": "Pet Adoption Platform - Root package for deployment scripts",
+  "scripts": {
+    "setup-render": "node scripts/setup-render-env.js"
+  },
+  "private": true
+}
+
