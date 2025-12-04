@@ -5,10 +5,20 @@ const SugestedDonationCamp = () => {
     const [donationCamp, setDonationCamp] = useState([]);
     useEffect(() => {
          
-          fetch(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/api/donations`, )
+          fetch(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/api/donations`)
             .then(response => response.json())
-            .then(data => setDonationCamp(data.data))
-            .catch(error => console.error("Error fetching donation:", error));
+            .then(data => {
+              // Ensure data.data is an array before setting it
+              if (Array.isArray(data.data)) {
+                setDonationCamp(data.data);
+              } else {
+                setDonationCamp([]);
+              }
+            })
+            .catch(error => {
+              console.error("Error fetching donation:", error);
+              setDonationCamp([]); // Set to empty array on error
+            });
         
       }, []);
     return (

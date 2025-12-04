@@ -7,7 +7,7 @@ import { useLoaderData } from 'react-router-dom';
 
 const AllPetsByCategory = () => {
     const pets=useLoaderData()
-    const petsByCategory = pets?.data || [];
+    const petsByCategory = Array.isArray(pets?.data) ? pets.data : [];
  
   if (petsByCategory.length === 0) {
     return (
@@ -23,9 +23,8 @@ const AllPetsByCategory = () => {
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:gap-10 lg:mx-20 my-16'>
         {petsByCategory.map((pet) => (
-          <AllPetsByCategoryCard key={pet._id} pet={pet}></AllPetsByCategoryCard>
-        ))
-    }
+          <AllPetsByCategoryCard key={pet._id} pet={pet} />
+        ))}
       </div>
     </div>
         </div>

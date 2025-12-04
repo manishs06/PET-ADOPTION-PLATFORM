@@ -38,9 +38,11 @@ const PetListing = () => {
 
       if (response.data.success) {
         const { data, pagination } = response.data;
-        setPets(prevPets => (currentPage === 1 ? data : [...prevPets, ...data]));
-        setTotalPages(pagination.pages || 1);
-        setHasMore(currentPage < (pagination.pages || 1));
+        // Ensure data is an array before setting it
+        const petsData = Array.isArray(data) ? data : [];
+        setPets(prevPets => (currentPage === 1 ? petsData : [...prevPets, ...petsData]));
+        setTotalPages(pagination?.pages || 1);
+        setHasMore(currentPage < (pagination?.pages || 1));
       } else {
         throw new Error(response.data.message || 'Failed to fetch pets');
       }

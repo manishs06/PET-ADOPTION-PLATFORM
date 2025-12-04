@@ -110,10 +110,18 @@ const router = createBrowserRouter([
         path: '/donationcampaigndetails/:id',
         element: <PrivateRoute><DonationCampaignDetails></DonationCampaignDetails></PrivateRoute>,
         loader: async ({ params }) => {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/donations/${params.id}`);
-          const result = await response.json();
-          // The API returns { success: true, data: {...} }, so we need to return the data property
-          return result.data;
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/donations/${params.id}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            // The API returns { success: true, data: {...} }, so we need to return the data property
+            return result.data || {};
+          } catch (error) {
+            console.error('Error loading donation campaign:', error);
+            return {};
+          }
         }
       },
       {
@@ -148,9 +156,17 @@ const router = createBrowserRouter([
         path: '/adoptpet/:id',
         element: <PrivateRoute><AdoptPet></AdoptPet></PrivateRoute>,
         loader: async ({ params }) => {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/${params.id}`);
-          const result = await response.json();
-          return result.data; // Extract the pet data from the API response
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/${params.id}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            return result.data || {}; // Extract the pet data from the API response
+          } catch (error) {
+            console.error('Error loading pet:', error);
+            return {};
+          }
         }
       },
       {
@@ -168,14 +184,38 @@ const router = createBrowserRouter([
       {
         path: '/updatedonationcamp/:donationCampaignId',
         element: <PrivateRoute><UpdateDonationCampDashboard></UpdateDonationCampDashboard></PrivateRoute>,
-        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_BASE_URL}/donations/${params.donationCampaignId}`)
+        loader: async ({ params }) => {
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/donations/${params.donationCampaignId}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            return result || {};
+          } catch (error) {
+            console.error('Error loading donation campaign:', error);
+            return {};
+          }
+        }
       },
 
 
       {
         path: '/updatepet/:petId',
         element: <PrivateRoute><UpdatePetDashboard></UpdatePetDashboard></PrivateRoute>,
-        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/${params.petId}`)
+        loader: async ({ params }) => {
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/${params.petId}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            return result || {};
+          } catch (error) {
+            console.error('Error loading pet:', error);
+            return {};
+          }
+        }
 
       },
       {

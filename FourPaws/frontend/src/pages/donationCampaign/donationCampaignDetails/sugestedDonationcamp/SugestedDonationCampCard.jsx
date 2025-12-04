@@ -11,7 +11,7 @@ const SugestedDonationCampCard = ({card}) => {
     const {_id, image, targetAmount, description} = card;
     
     // Create a short description from the full description
-    const shortDescription = description ? 
+    const shortDescription = description && typeof description === 'string' ? 
       (description.length > 100 ? description.substring(0, 100) + '...' : description) : 
       'No description available';
    

@@ -9,7 +9,7 @@ const DonationCampCard = ({card}) => {
     const formattedDate = endDate ? new Date(endDate).toLocaleDateString() : 'N/A';
     
     // Create a short description from the full description
-    const shortDescription = description ? 
+    const shortDescription = description && typeof description === 'string' ? 
       (description.length > 100 ? description.substring(0, 100) + '...' : description) : 
       'No description available';
     
