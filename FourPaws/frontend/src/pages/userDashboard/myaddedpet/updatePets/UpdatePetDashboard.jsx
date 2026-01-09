@@ -10,8 +10,8 @@ import { useContext } from 'react';
 const UpdatePetDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const{user}=useContext(AuthContext);
-  const[isAdmin,setIsAdmin]=useState(false)
+  const { user } = useContext(AuthContext);
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('access-token');
@@ -21,7 +21,7 @@ const UpdatePetDashboard = () => {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/api/users`, {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -30,7 +30,7 @@ const UpdatePetDashboard = () => {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          setUsers(Array.isArray(data.data) ? data.data : []);
+          setUsers(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } else {
           setUsers([]);
         }
@@ -43,7 +43,7 @@ const UpdatePetDashboard = () => {
       });
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     if (Array.isArray(users) && users.length > 0 && user?.email) {
       const result = users.find((us) => us?.email === user?.email);
       console.log('usersss', result);
@@ -52,12 +52,12 @@ const UpdatePetDashboard = () => {
       setIsAdmin(admin);
     }
   }, [users, user])
-  
+
 
   if (loading) {
     // Show a loading spinner or message while waiting for data
     return <div className=" h-[80vh] flex justify-center items-center">
-    <div className=" rounded-md h-12 w-12 border-4 border-t-4 border-pink-600 animate-spin "></div>;
+      <div className=" rounded-md h-12 w-12 border-4 border-t-4 border-pink-600 animate-spin "></div>;
     </div>;
   }
   // console.log(users);
@@ -65,58 +65,58 @@ const UpdatePetDashboard = () => {
   //  const isAdmin = users.some(user => user.role === 'Admin');
   //  console.log('adminnnn',isAdmin);
   const navLinks =
-  <>
-  <div className="flex flex-col items-center mb-5">
-               <div className=" bg-white rounded-full p-5 w-24"> <img src={logo}  alt="" /></div>
-              <div className="  text-2xl font-bold ">FourPaws</div>
-               </div>
-               {isAdmin && 
-      <>
-        <li>
-          <NavLink
-            to="/allusers"
-            className={({ isActive, isPending }) =>
-              isPending
-                ? "pending text-white"
-                : isActive
-                ? "text-warning  text-lg font-bold underline underline-offset-8 hover:text-red  "
-                : ""
-            }
-          >
-            All Users
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/allpetsadmin"
-            className={({ isActive, isPending }) =>
-              isPending
-                ? "pending text-white"
-                : isActive
-                ? "text-warning font-bold underline underline-offset-8 hover:text-red  "
-                : ""
-            }
-          >
-            All Pets
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/alldonationcampadmin"
-            className={({ isActive, isPending }) =>
-              isPending
-                ? "pending text-white"
-                : isActive
-                ? "text-warning font-bold underline underline-offset-8 hover:text-red  "
-                : ""
-            }
-          >
-            All Donation Campaign
-          </NavLink>
-        </li>
-        <div className=' divider text-white'></div>
-      </>
-}
+    <>
+      <div className="flex flex-col items-center mb-5">
+        <div className=" bg-white rounded-full p-5 w-24"> <img src={logo} alt="" /></div>
+        <div className="  text-2xl font-bold ">FourPaws</div>
+      </div>
+      {isAdmin &&
+        <>
+          <li>
+            <NavLink
+              to="/allusers"
+              className={({ isActive, isPending }) =>
+                isPending
+                  ? "pending text-white"
+                  : isActive
+                    ? "text-warning  text-lg font-bold underline underline-offset-8 hover:text-red  "
+                    : ""
+              }
+            >
+              All Users
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/allpetsadmin"
+              className={({ isActive, isPending }) =>
+                isPending
+                  ? "pending text-white"
+                  : isActive
+                    ? "text-warning font-bold underline underline-offset-8 hover:text-red  "
+                    : ""
+              }
+            >
+              All Pets
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/alldonationcampadmin"
+              className={({ isActive, isPending }) =>
+                isPending
+                  ? "pending text-white"
+                  : isActive
+                    ? "text-warning font-bold underline underline-offset-8 hover:text-red  "
+                    : ""
+              }
+            >
+              All Donation Campaign
+            </NavLink>
+          </li>
+          <div className=' divider text-white'></div>
+        </>
+      }
       <li><NavLink to="/addpet" className={({ isActive, isPending }) =>
         isPending ? "pending  text-white" : isActive ? "text-warning  font-bold underline underline-offset-8 hover:text-red  " : ""
       }>Add a Pet</NavLink></li>
@@ -139,8 +139,8 @@ const UpdatePetDashboard = () => {
       <li className="pt-4 "><NavLink to="/" className={({ isActive, isPending }) =>
         isPending ? "pending  text-white" : isActive ? "text-warning font-bold  underline underline-offset-8  hover:text-red " : ""
       }>Home</NavLink></li>
-  
-  
+
+
     </>
   return (
     <div className='grid grid-cols-4'>
@@ -165,7 +165,7 @@ const UpdatePetDashboard = () => {
           <p className='border-y-2 w-4/12 mx-auto text-3xl  font-bold text-center '>User Dashboard</p>
         </div>
         {/* con */}
-<UpdatePet></UpdatePet>
+        <UpdatePet></UpdatePet>
 
       </div>
     </div>

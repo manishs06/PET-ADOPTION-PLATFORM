@@ -92,7 +92,7 @@ const router = createBrowserRouter([
       {
         path: '/catagorized_pets/:cat',
         element: <AllPetsByCategory></AllPetsByCategory>,
-        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/category/${params.cat}`)
+        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/category/${params.cat}`).then(res => res.json()).then(result => result.data || [])
       },
       {
         path: '/adoptionreq',
@@ -116,7 +116,6 @@ const router = createBrowserRouter([
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
-            // The API returns { success: true, data: {...} }, so we need to return the data property
             return result.data || {};
           } catch (error) {
             console.error('Error loading donation campaign:', error);
@@ -162,7 +161,7 @@ const router = createBrowserRouter([
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
-            return result.data || {}; // Extract the pet data from the API response
+            return result.data || {};
           } catch (error) {
             console.error('Error loading pet:', error);
             return {};
@@ -191,7 +190,7 @@ const router = createBrowserRouter([
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
-            return result || {};
+            return result.data || result || {};
           } catch (error) {
             console.error('Error loading donation campaign:', error);
             return {};
@@ -210,7 +209,7 @@ const router = createBrowserRouter([
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
-            return result || {};
+            return result.data || result || {};
           } catch (error) {
             console.error('Error loading pet:', error);
             return {};

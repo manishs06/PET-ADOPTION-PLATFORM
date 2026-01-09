@@ -11,15 +11,14 @@ import { AuthContext } from '../../../../components/providers/AuthWrapper';
 
 const UpdatePet = () => {
   const { user } = useContext(AuthContext);
-  const pet=useLoaderData()
-  const [updateImage, setUpdateImage] = useState('');
-  const [url, setUrl] = useState('');
-
-  const navigate = useNavigate();
   const { petId } = useParams();
-  const {_id,name,shortdesp,longdesp,age,location,image,category}=pet;
-  const [updateCategory, setUpdateCategory] = useState(category);
-  const [photourl,setPhotourl]=useState('link')
+  const pet = useLoaderData();
+  const [updateImage, setUpdateImage] = useState('');
+  const [url, setUrl] = useState(pet?.image || '');
+  const navigate = useNavigate();
+  const { _id, name, shortdesp, longdesp, age, location, image, category } = pet || {};
+  const [updateCategory, setUpdateCategory] = useState(category ? { value: category, label: category } : null);
+  const [photourl, setPhotourl] = useState('link')
   const categoryOptions = [
     { value: "Dog", label: "Dog" },
     { value: "Cat", label: "Cat" },
@@ -30,46 +29,16 @@ const UpdatePet = () => {
   ];
 
   const [initialValues, setInitialValues] = useState({
-    name: name,
-    age: age,
-    category: "",
-    location: location,
-    shortdesp: shortdesp,
-    longdesp: longdesp,
-    photo: image,
+    name: name || "",
+    age: age || "",
+    category: category || "",
+    location: location || "",
+    shortdesp: shortdesp || "",
+    longdesp: longdesp || "",
+    photo: image || "",
   });
-  useEffect(() => {
-    if (!petId) {
-      // Handle the case where petId is undefined
-      console.error('Pet ID is undefined');
-      return;
-    }
-  
-    const fetchPetData = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/api/pets/${petId}`);
-        const data = await response.json();
-  
-        setInitialValues({
-          name: data.name,
-          age: data.age,
-          category: { value: data.category, label: data.category },
-          location: data.location,
-          shortdesp: data.shortdesp,
-          longdesp: data.longdesp,
-          photo: data.image,  // Make sure this is correct
-        });
-  
-        setUrl(data.image);
-        setUpdateCategory({ value: data.category, label: data.category });
-      } catch (error) {
-        console.error("Error fetching pet data:", error);
-      }
-    };
-  
-    fetchPetData();
-  }, [petId]);
-  
+  // No need for redundant fetch as we use useLoaderData
+
 
   const saveImage = async () => {
     try {
@@ -94,7 +63,7 @@ const UpdatePet = () => {
       console.error("Error uploading image:", error);
     }
   };
-  
+
 
   const handleCategorySelectChange = (selectedOption) => {
     setUpdateCategory(selectedOption);
@@ -126,7 +95,7 @@ const UpdatePet = () => {
         //   setFieldValue("photo", file);
         //   fileInputRef.current.value = '';
         // };
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/api/pets/${petId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/pets/${petId}`, {
           method: "PUT",
           headers: {
             "content-type": "application/json",
@@ -136,31 +105,28 @@ const UpdatePet = () => {
 
         const data = await response.json();
 
-        if (data.modifiedCount > 0) {
+        if (data.success || data.modifiedCount > 0) {
           Swal.fire({
             title: 'Success!',
             text: 'Pet Info Updated Successfully',
             icon: 'success',
             confirmButtonText: 'Cool',
-            customClass: {
-              confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-            }
           });
-          // navigate('/');
+          navigate('/myaddedpets');
         }
       } catch (error) {
         console.error("Error updating pet:", error);
       }
     },
   });
-    
-        
+
+
 
   return (
     <div>
       <div className="flex items-center justify-center p-12 w-full lg:w-10/12 mx-auto bg-blue-200 mt-16 rounded-xl">
         <div className="mx-auto w-full max-w-[550px] shadow-lg p-6 rounded-md">
-        <form onSubmit={handleSubmit} >
+          <form onSubmit={handleSubmit} >
             <div className='flex '>
               <div className="w-full">
                 <label className="mb-3 block text-base font-medium text-[#07074D]">
@@ -177,32 +143,32 @@ const UpdatePet = () => {
                         src={updateImage ? URL.createObjectURL(updateImage) : ""}
                         alt="img"
                       />
- 
+
                       : <img
                         src="https://cdn-icons-png.flaticon.com/128/1665/1665680.png"
                         className="w-10"
                       />}
                   </label>
-                 <div>
-                  <input type="text" defaultValue={image} />
-                  <input
-                    id="file-upload"
-                    className='text-white'
-                    type="file"
-                    name="photo"
-                    defaultValue={''}
-                    // value={values.photo}
-                    onBlur={handleBlur}
-                    
-                    onChange={(e) => setUpdateImage(e.target.files[0])}
-                  />
-                 </div>
+                  <div>
+                    <input type="text" defaultValue={image} />
+                    <input
+                      id="file-upload"
+                      className='text-white'
+                      type="file"
+                      name="photo"
+                      defaultValue={''}
+                      // value={values.photo}
+                      onBlur={handleBlur}
+
+                      onChange={(e) => setUpdateImage(e.target.files[0])}
+                    />
+                  </div>
                   {/* value={updateImage || values.photo} */}
                 </div>
-                {errors.photo && touched.photo? (<p className=" text-error">{errors.photo}</p>):null}
+                {errors.photo && touched.photo ? (<p className=" text-error">{errors.photo}</p>) : null}
               </div>
             </div>
-              {/* <div className="mb-5">
+            {/* <div className="mb-5">
                 <label htmlFor="photo" className="mb-3 block text-base font-medium text-[#07074D] ">
                   Add the Pet Image
                 </label>
@@ -219,132 +185,132 @@ const UpdatePet = () => {
                   className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                 />
               </div> */}
-              <div htmlFor='name' className="mb-5">
-                <label className="mb-3 block text-base font-medium text-[#07074D]">
-                  Add the Pet Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  placeholder="Name"
-                  // defaultValue={name}
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min="0"
-                  // autoComplete="off"
-                  className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                />
-                 {errors.name && touched.name? (<p className=" text-error">{errors.name}</p>):null}
-              </div>
-              <div className="mb-5">
-                <label htmlFor="pet_location" className="mb-3 block text-base font-medium text-[#07074D]">
-                  Add the Pet Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  id="location"
-                  placeholder="pet location"
-                  // defaultValue={location}
-                  value={values.location}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min="0"
-                  className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                />
-                 {errors.location && touched.location? (<p className=" text-error">{errors.location}</p>):null}
-              </div>
-             
-              <div className="mb-5">
-        <label htmlFor="pet_category" className="mb-3 block text-base font-medium text-[#07074D]">
-          Pet Category
-        </label>
-        <Select
-          name="pet_category"
-          id="pet_category"
-          
-          value={updateCategory}
-          required
-          options={categoryOptions}
-          onChange={handleCategorySelectChange}
-          className="w-full rounded-md border border-[#e0e0e0] bg-white text-base font-medium text-[#6B7280] focus:border-[#6A64F1] focus:shadow-md"
-        />
-         {errors.category && touched.category? (<p className=" text-error">{errors.category}</p>):null}
-      </div>
-              
-              <div className="-mx-3 flex flex-wrap">
-                <div className="w-full px-3 sm:w-1/2">
-                  <div className="mb-5">
-                    <label htmlFor="age" className="mb-3 block text-base font-medium text-[#07074D]">
-                      Pet Age
-                    </label>
-                    <input
-                      type="number"
-                      name="age"
-                      id="age"
-                     
-                      placeholder="Pet Age"
-                      // defaultValue={age}
-                      value={values.age}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                      className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                    />
-                     {errors.age && touched.age? (<p className=" text-error">{errors.age}</p>):null}
-                  </div>
+            <div htmlFor='name' className="mb-5">
+              <label className="mb-3 block text-base font-medium text-[#07074D]">
+                Add the Pet Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Name"
+                // defaultValue={name}
+                value={values.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                min="0"
+                // autoComplete="off"
+                className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+              />
+              {errors.name && touched.name ? (<p className=" text-error">{errors.name}</p>) : null}
+            </div>
+            <div className="mb-5">
+              <label htmlFor="pet_location" className="mb-3 block text-base font-medium text-[#07074D]">
+                Add the Pet Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                id="location"
+                placeholder="pet location"
+                // defaultValue={location}
+                value={values.location}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                min="0"
+                className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+              />
+              {errors.location && touched.location ? (<p className=" text-error">{errors.location}</p>) : null}
+            </div>
+
+            <div className="mb-5">
+              <label htmlFor="pet_category" className="mb-3 block text-base font-medium text-[#07074D]">
+                Pet Category
+              </label>
+              <Select
+                name="pet_category"
+                id="pet_category"
+
+                value={updateCategory}
+                required
+                options={categoryOptions}
+                onChange={handleCategorySelectChange}
+                className="w-full rounded-md border border-[#e0e0e0] bg-white text-base font-medium text-[#6B7280] focus:border-[#6A64F1] focus:shadow-md"
+              />
+              {errors.category && touched.category ? (<p className=" text-error">{errors.category}</p>) : null}
+            </div>
+
+            <div className="-mx-3 flex flex-wrap">
+              <div className="w-full px-3 sm:w-1/2">
+                <div className="mb-5">
+                  <label htmlFor="age" className="mb-3 block text-base font-medium text-[#07074D]">
+                    Pet Age
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    id="age"
+
+                    placeholder="Pet Age"
+                    // defaultValue={age}
+                    value={values.age}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+                  />
+                  {errors.age && touched.age ? (<p className=" text-error">{errors.age}</p>) : null}
                 </div>
-                
               </div>
-              <div className="mb-5">
-                <label htmlFor="shortdesp" className="mb-3 block text-base font-medium text-[#07074D]">
-                  Add Short Description
-                </label>
-                <input
-                  type="text"
-                  name="shortdesp"
-                  id="shortdesp"
-                  placeholder="Short Description"
-                  // defaultValue={shortdesp}
-                  value={values.shortdesp}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min="0"
-                  // autoComplete="off"
-                  className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                />
-                 {errors.shortdesp && touched.shortdesp? (<p className=" text-error">{errors.shortdesp}</p>):null}
-              </div>
-              
-              <div className="mb-5">
-        <label htmlFor="longdesp" className="mb-3 block text-base font-medium text-[#07074D]">
-          Add Long Description
-        </label>
-        <textarea
-          name="longdesp"
-          id="longdesp"
-          placeholder="Long Description"
-          // defaultValue={longdesp}
-          value={values.longdesp}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          min="0"
-          // autoComplete="off"
-          rows="4" // Specify the number of rows for the text area
-          className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md resize-none" // Added resize-none to disable resizing
-        />
-         {errors.longdesp && touched.longdesp? (<p className=" text-error">{errors.longdesp}</p>):null}
-      </div>
-              <div>
+
+            </div>
+            <div className="mb-5">
+              <label htmlFor="shortdesp" className="mb-3 block text-base font-medium text-[#07074D]">
+                Add Short Description
+              </label>
+              <input
+                type="text"
+                name="shortdesp"
+                id="shortdesp"
+                placeholder="Short Description"
+                // defaultValue={shortdesp}
+                value={values.shortdesp}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                min="0"
+                // autoComplete="off"
+                className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
+              />
+              {errors.shortdesp && touched.shortdesp ? (<p className=" text-error">{errors.shortdesp}</p>) : null}
+            </div>
+
+            <div className="mb-5">
+              <label htmlFor="longdesp" className="mb-3 block text-base font-medium text-[#07074D]">
+                Add Long Description
+              </label>
+              <textarea
+                name="longdesp"
+                id="longdesp"
+                placeholder="Long Description"
+                // defaultValue={longdesp}
+                value={values.longdesp}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                min="0"
+                // autoComplete="off"
+                rows="4" // Specify the number of rows for the text area
+                className="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md resize-none" // Added resize-none to disable resizing
+              />
+              {errors.longdesp && touched.longdesp ? (<p className=" text-error">{errors.longdesp}</p>) : null}
+            </div>
+            <div>
               <button
                 type="submit"
                 className="hover:shadow-form rounded-md hover:bg-blue-400 py-3 px-8 text-center text-base font-semibold text-white outline-none w-full bg-[#ff0000]"
               >
                 Updat Pet
               </button>
-              </div>
-            </form>
+            </div>
+          </form>
         </div>
       </div>
     </div>

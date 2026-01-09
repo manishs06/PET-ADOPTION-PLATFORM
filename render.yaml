@@ -44,4 +44,15 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
-
+  - type: static
+    name: fourpaws-frontend
+    env: static
+    buildCommand: cd FourPaws/frontend && npm install && npm run build
+    publishPath: FourPaws/frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_IMGBB_API_KEY
+        sync: false
+      - key: VITE_Payment_Gateway_PK
+        sync: false
