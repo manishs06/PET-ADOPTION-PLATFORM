@@ -28,6 +28,9 @@ build/
 FourPaws/backend/node_modules/
 FourPaws/backend/.env
 FourPaws/backend/config.env
+FourPaws/backend/createAdmin.js
+FourPaws/backend/updateAdminPassword.js
+FourPaws/backend/scripts/migrate-user-photos.js
 
 # Ignore everything in frontend except the source files
 FourPaws/frontend/node_modules/
