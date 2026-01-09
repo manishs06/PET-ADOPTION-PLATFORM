@@ -53,7 +53,7 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     // In production, be more strict; in development, allow localhost
     if (process.env.NODE_ENV === 'production') {
       if (allowedOrigins.indexOf(origin) !== -1) {
@@ -85,7 +85,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/pet-adoption-platform')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/PetAdoption')
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err.message);
@@ -95,8 +95,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/pet-adopt
 
 // Health check route
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+  res.status(200).json({
+    status: 'OK',
     message: 'Pet Adoption Platform API is running',
     timestamp: new Date().toISOString()
   });
@@ -126,9 +126,9 @@ app.use((err, req, res, next) => {
     // In production, log errors but don't expose details
     console.error('Error:', err.message);
   }
-  
-  res.status(err.status || 500).json({ 
-    success: false, 
+
+  res.status(err.status || 500).json({
+    success: false,
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
@@ -139,9 +139,9 @@ app.use('*', (req, res) => {
   if (process.env.NODE_ENV === 'development') {
     console.log('404 - Route not found:', req.originalUrl);
   }
-  res.status(404).json({ 
-    success: false, 
-    message: 'Route not found' 
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
   });
 });
 
