@@ -20,12 +20,14 @@ export const PetCountProvider = ({ children }) => {
       setLoading(true);
       const response = await fetchPetCategories();
       const categories = response.data || [];
-      
+
       const counts = {};
       categories.forEach(category => {
-        counts[category.category.toLowerCase()] = category.petCount || 0;
+        if (category && category.category) {
+          counts[category.category.toLowerCase()] = category.petCount || 0;
+        }
       });
-      
+
       setPetCounts(counts);
     } catch (error) {
       console.error('Error fetching pet counts:', error);
@@ -40,7 +42,7 @@ export const PetCountProvider = ({ children }) => {
       ...prev,
       [category.toLowerCase()]: Math.max(0, (prev[category.toLowerCase()] || 0) + delta)
     }));
-    
+
     // Also fetch fresh counts from the server to ensure consistency
     fetchPetCounts();
   };

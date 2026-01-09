@@ -65,10 +65,10 @@ const Home = () => {
                         name: cat.name || cat.category || 'Unknown',
                         image: cat.image || `https://placehold.co/600x400?text=${encodeURIComponent(cat.category || cat.name || 'Pet')}`,
                         icon: cat.icon || '🐾',
-                        petCount: petCounts[cat.category?.toLowerCase()] !== undefined
-                            ? petCounts[cat.category?.toLowerCase()]
+                        petCount: (cat.category && petCounts[cat.category.toLowerCase()] !== undefined)
+                            ? petCounts[cat.category.toLowerCase()]
                             : (cat.petCount || 0),
-                        slug: cat.slug || (cat.category || '').toLowerCase(),
+                        slug: cat.slug || (cat.category ? cat.category.toLowerCase() : ''),
                     }));
 
                     // Filter to show only 4 main categories: Dogs, Cats, Birds, Fish
