@@ -18,10 +18,10 @@ FourPaws is a comprehensive pet adoption platform that allows users to:
 
 The platform provides a seamless experience for both pet owners looking to find homes for their pets and individuals seeking to adopt a new companion.
 
-## 🚀 Live Demo
+## 🚀 Live Project
 
-- **Frontend:** [https://pet-adoption-platform-1-ak5k.onrender.com](https://pet-adoption-platform-1-ak5k.onrender.com)
-- **Backend API:** [https://pet-adoption-platform-plpr.onrender.com/api](https://pet-adoption-platform-plpr.onrender.com/api)
+[Live Link](https://pet-adoption-platform-1-ak5k.onrender.com)
+
 
 ## Deployment
 
