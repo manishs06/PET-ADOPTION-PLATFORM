@@ -3,6 +3,7 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const router = express.Router();
+console.log('--- Upload Route File Initialized ---');
 
 // Check if ImgBB is configured
 const isImgBBConfigured = process.env.IMGBB_API_KEY && process.env.IMGBB_API_KEY !== 'your_imgbb_api_key';
@@ -33,74 +34,59 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     const key = process.env.IMGBB_API_KEY;
-    console.log(`Starting upload for file: ${req.file.originalname}, size: ${req.file.size} bytes. Key present: ${!!key}`);
+    console.log(`Upload attempt: ${req.file.originalname}, size: ${req.file.size}`);
 
     if (!isImgBBConfigured) {
-      console.log('ImgBB not configured, using placeholder fallback');
+      console.log('ImgBB not configured, returning placeholder');
       const filename = req.file.originalname;
       const placeholderUrl = `https://via.placeholder.com/800x600/cccccc/666666?text=${encodeURIComponent(filename)}`;
-
       return res.status(200).json({
         success: true,
-        message: 'Image uploaded successfully (placeholder)',
-        data: {
-          url: placeholderUrl,
-          publicId: filename,
-          note: 'ImgBB not configured - using placeholder image'
-        }
+        message: 'Image uploaded (placeholder)',
+        data: { url: placeholderUrl, publicId: filename }
       });
     }
 
-    // Upload to ImgBB using FormData
-    const form = new FormData();
-    form.append('image', req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
+    // Convert to base64
+    const base64Image = req.file.buffer.toString('base64');
 
-    try {
-      const response = await axios.post(
-        `https://api.imgbb.com/1/upload?key=${key}`,
-        form,
-        {
-          headers: {
-            ...form.getHeaders()
-          },
-          timeout: 60000
-        }
-      );
+    // Create form data using native URLSearchParams for simplicity and avoid stream issues
+    const params = new URLSearchParams();
+    params.append('image', base64Image);
 
-      if (response.data && response.data.data && response.data.data.url) {
-        console.log('ImgBB upload successful:', response.data.data.url);
-        res.status(200).json({
-          success: true,
-          message: 'Image uploaded successfully',
-          data: {
-            url: response.data.data.url,
-            publicId: response.data.data.id,
-            deleteUrl: response.data.data.delete_url
-          }
-        });
-      } else {
-        throw new Error('ImgBB response missing expected data fields');
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${key}`,
+      params,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout: 60000
       }
-    } catch (axiosError) {
-      console.error('External API (ImgBB) error:', axiosError.response?.data || axiosError.message);
-      const errorDetail = axiosError.response?.data?.error?.message || axiosError.message;
-      return res.status(axiosError.response?.status || 500).json({
-        success: false,
-        message: 'External image service error',
-        error: errorDetail,
-        details: axiosError.response?.data
-      });
-    }
+    );
 
+    if (response.data && response.data.data) {
+      console.log('Upload success');
+      return res.status(200).json({
+        success: true,
+        message: 'Image uploaded successfully',
+        data: {
+          url: response.data.data.url,
+          publicId: response.data.data.id,
+          deleteUrl: response.data.data.delete_url
+        }
+      });
+    } else {
+      throw new Error('Invalid response from ImgBB');
+    }
   } catch (error) {
-    console.error('Server-side upload error:', error);
-    res.status(500).json({
+    console.error('Upload Error:', error.response?.data || error.message);
+    const detail = error.response?.data?.error?.message || error.message;
+    res.status(error.response?.status || 500).json({
       success: false,
-      message: 'Image upload failed',
-      error: error.message
+      message: 'Upload failed',
+      error: detail,
+      debug: process.env.NODE_ENV === 'development' ? error.response?.data : undefined
     });
   }
 });
