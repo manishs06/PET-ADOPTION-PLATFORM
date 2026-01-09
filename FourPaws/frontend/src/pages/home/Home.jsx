@@ -1,3 +1,5 @@
+// Cache refresh: 2026-01-10T00:10:00Z
+// Force Refresh: 2026-01-10T00:12:00
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPetCategories } from '../../utils/api';

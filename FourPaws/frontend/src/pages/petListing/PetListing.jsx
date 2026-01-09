@@ -59,7 +59,7 @@ const PetListing = () => {
 
   const debouncedFetch = useCallback(debounce(fetchPets, 500), [fetchPets]);
 
-    useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryFromUrl = params.get('category') || '';
     setSelectedCategory(categoryFromUrl);
@@ -97,7 +97,7 @@ const PetListing = () => {
     setSelectedCategory('');
   }, []);
 
-  if (loading && pets.length === 0) {
+  if (loading && (!pets || pets.length === 0)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -122,7 +122,7 @@ const PetListing = () => {
             </div>
           </div>
         </div>
-        <button 
+        <button
           onClick={() => fetchPets()}
           className="btn btn-primary mt-6 gap-2"
         >
@@ -134,8 +134,8 @@ const PetListing = () => {
       </div>
     );
   }
-  
-  if (!loading && !error && pets.length === 0) {
+
+  if (!loading && !error && (!pets || pets.length === 0)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <div className="text-center max-w-md">
@@ -146,7 +146,7 @@ const PetListing = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">No Pets Found</h2>
           <p className="text-gray-600 mb-6">There are currently no pets available for adoption. Please check back later.</p>
-          <button 
+          <button
             onClick={() => fetchPets()}
             className="btn btn-primary gap-2"
           >
@@ -164,7 +164,7 @@ const PetListing = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Available Pets</h1>
-        
+
         {/* Search and Filter */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center sticky top-0 bg-gray-50 z-10 py-4">
           <div className="w-full md:w-1/2">
@@ -186,7 +186,7 @@ const PetListing = () => {
               )}
             </div>
           </div>
-          
+
           <div className="w-full md:w-1/3">
             <select
               value={selectedCategory}
@@ -203,7 +203,7 @@ const PetListing = () => {
               <option value="other">Other</option>
             </select>
           </div>
-          
+
           {(searchQuery || selectedCategory) && (
             <button
               onClick={handleClearFilters}
@@ -213,7 +213,7 @@ const PetListing = () => {
             </button>
           )}
         </div>
-        
+
         {/* Pets Grid */}
         <div className="w-full">
           {loading ? (
@@ -245,7 +245,7 @@ const PetListing = () => {
                   You've seen all available pets!
                 </p>
               }
-                          >
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {pets.map((pet) => (
                   <PetListingCard key={pet._id} pet={pet} />
