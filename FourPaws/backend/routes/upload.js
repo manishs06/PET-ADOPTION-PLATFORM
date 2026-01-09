@@ -10,7 +10,7 @@ const router = express.Router();
 const isImgBBConfigured = process.env.IMGBB_API_KEY && process.env.IMGBB_API_KEY !== 'your_imgbb_api_key';
 
 // Configure multer with memory storage for ImgBB
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 32 * 1024 * 1024 // 32MB limit for ImgBB
@@ -34,11 +34,14 @@ router.post('/', upload.single('image'), async (req, res) => {
       });
     }
 
+    console.log(`Starting upload for file: ${req.file.originalname}, size: ${req.file.size} bytes`);
+    console.log(`ImgBB configured: ${!!process.env.IMGBB_API_KEY}`);
+
     if (!isImgBBConfigured) {
-      // Fallback: return a placeholder URL for development
+      console.log('ImgBB not configured, using placeholder fallback');
       const filename = req.file.originalname;
       const placeholderUrl = `https://via.placeholder.com/800x600/cccccc/666666?text=${encodeURIComponent(filename)}`;
-      
+
       return res.status(200).json({
         success: true,
         message: 'Image uploaded successfully (placeholder)',
@@ -50,40 +53,57 @@ router.post('/', upload.single('image'), async (req, res) => {
       });
     }
 
-    // Upload to ImgBB
+    // Upload to ImgBB using binary data via FormData
     const formData = new FormData();
-    formData.append('image', req.file.buffer.toString('base64'));
-    
-    const response = await axios.post(
-      `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders()
-        }
-      }
-    );
+    // Using the buffer directly is often more reliable than base64 for multipart
+    formData.append('image', req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
 
-    if (response.data && response.data.data && response.data.data.url) {
-      res.status(200).json({
-        success: true,
-        message: 'Image uploaded successfully',
-        data: {
-          url: response.data.data.url,
-          publicId: response.data.data.id,
-          deleteUrl: response.data.data.delete_url
+    try {
+      const response = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders()
+          },
+          // Increase timeout for image uploads
+          timeout: 30000
         }
+      );
+
+      if (response.data && response.data.data && response.data.data.url) {
+        console.log('ImgBB upload successful:', response.data.data.url);
+        res.status(200).json({
+          success: true,
+          message: 'Image uploaded successfully',
+          data: {
+            url: response.data.data.url,
+            publicId: response.data.data.id,
+            deleteUrl: response.data.data.delete_url
+          }
+        });
+      } else {
+        throw new Error('ImgBB response missing data');
+      }
+    } catch (axiosError) {
+      console.error('External API (ImgBB) error:', axiosError.response?.data || axiosError.message);
+      const errorDetail = axiosError.response?.data?.error?.message || axiosError.message;
+      return res.status(axiosError.response?.status || 500).json({
+        success: false,
+        message: 'External image service error',
+        error: errorDetail
       });
-    } else {
-      throw new Error('Upload failed - no URL returned');
     }
 
   } catch (error) {
-    console.error('ImgBB upload error:', error);
+    console.error('Server-side upload error:', error);
     res.status(500).json({
       success: false,
       message: 'Image upload failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: error.message
     });
   }
 });
@@ -98,7 +118,10 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
       });
     }
 
+    console.log(`Starting multiple upload for ${req.files.length} files`);
+
     if (!isImgBBConfigured) {
+      console.log('ImgBB not configured, using placeholder fallbacks for multiple upload');
       // Fallback: return placeholder URLs
       const uploadedImages = req.files.map(file => ({
         url: `https://via.placeholder.com/800x600/cccccc/666666?text=${encodeURIComponent(file.originalname)}`,
@@ -117,19 +140,24 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
 
     // Upload each image to ImgBB
     const uploadedImages = [];
-    
+    const errors = [];
+
     for (const file of req.files) {
       try {
         const formData = new FormData();
-        formData.append('image', file.buffer.toString('base64'));
-        
+        formData.append('image', file.buffer, {
+          filename: file.originalname,
+          contentType: file.mimetype,
+        });
+
         const response = await axios.post(
           `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
           formData,
           {
             headers: {
               ...formData.getHeaders()
-            }
+            },
+            timeout: 30000
           }
         );
 
@@ -141,25 +169,29 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
           });
         }
       } catch (fileError) {
-        console.error('Error uploading file to ImgBB:', fileError);
-        // Continue with other files even if one fails
+        console.error(`Error uploading file ${file.originalname} to ImgBB:`, fileError.response?.data || fileError.message);
+        errors.push({
+          file: file.originalname,
+          error: fileError.response?.data?.error?.message || fileError.message
+        });
       }
     }
 
     res.status(200).json({
       success: true,
-      message: 'Images uploaded successfully',
+      message: uploadedImages.length > 0 ? 'Images processed' : 'Image upload failed',
       data: {
-        images: uploadedImages
+        images: uploadedImages,
+        errors: errors.length > 0 ? errors : undefined
       }
     });
 
   } catch (error) {
-    console.error('Multiple upload error:', error);
+    console.error('Multiple upload main error:', error);
     res.status(500).json({
       success: false,
-      message: 'Image upload failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      message: 'Image upload process failed',
+      error: error.message
     });
   }
 });
@@ -173,7 +205,7 @@ router.delete('/:publicId', async (req, res) => {
         message: 'Image deletion simulated (ImgBB not configured)'
       });
     }
-    
+
     // ImgBB doesn't provide a direct API for deletion from server-side without the delete URL
     // We'll just simulate successful deletion
     res.status(200).json({
