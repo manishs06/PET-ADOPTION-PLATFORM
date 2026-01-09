@@ -1,9 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-
 const router = express.Router();
 
 // Check if ImgBB is configured
@@ -35,7 +32,6 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     console.log(`Starting upload for file: ${req.file.originalname}, size: ${req.file.size} bytes`);
-    console.log(`ImgBB configured: ${!!process.env.IMGBB_API_KEY}`);
 
     if (!isImgBBConfigured) {
       console.log('ImgBB not configured, using placeholder fallback');
@@ -53,24 +49,20 @@ router.post('/', upload.single('image'), async (req, res) => {
       });
     }
 
-    // Upload to ImgBB using binary data via FormData
-    const formData = new FormData();
-    // Using the buffer directly is often more reliable than base64 for multipart
-    formData.append('image', req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
+    // Upload to ImgBB using base64 via urlencoded (most reliable method for ImgBB)
+    const base64Image = req.file.buffer.toString('base64');
+    const params = new URLSearchParams();
+    params.append('image', base64Image);
 
     try {
       const response = await axios.post(
         `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
-        formData,
+        params,
         {
           headers: {
-            ...formData.getHeaders()
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          // Increase timeout for image uploads
-          timeout: 30000
+          timeout: 40000
         }
       );
 
@@ -89,7 +81,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         throw new Error('ImgBB response missing data');
       }
     } catch (axiosError) {
-      console.error('External API (ImgBB) error:', axiosError.response?.data || axiosError.message);
+      console.error('ImgBB API error details:', axiosError.response?.data || axiosError.message);
       const errorDetail = axiosError.response?.data?.error?.message || axiosError.message;
       return res.status(axiosError.response?.status || 500).json({
         success: false,
@@ -144,20 +136,18 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
 
     for (const file of req.files) {
       try {
-        const formData = new FormData();
-        formData.append('image', file.buffer, {
-          filename: file.originalname,
-          contentType: file.mimetype,
-        });
+        const base64Image = file.buffer.toString('base64');
+        const params = new URLSearchParams();
+        params.append('image', base64Image);
 
         const response = await axios.post(
           `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
-          formData,
+          params,
           {
             headers: {
-              ...formData.getHeaders()
+              'Content-Type': 'application/x-www-form-urlencoded'
             },
-            timeout: 30000
+            timeout: 40000
           }
         );
 
