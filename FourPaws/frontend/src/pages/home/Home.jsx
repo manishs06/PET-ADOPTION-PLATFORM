@@ -11,43 +11,43 @@ import { usePetCount } from '../../contexts/PetCountContext';
 
 // Default pet categories in case API call fails
 const defaultPetCategories = [
-  {
-    _id: "1",
-    category: "Dogs",
-    name: "Dogs",
-    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80",
-    icon: "🐶",
-    petCount: 0
-  },
-  {
-    _id: "2",
-    category: "Cats",
-    name: "Cats",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1143&q=80",
-    icon: "🐱",
-    petCount: 0
-  },
-  {
-    _id: "3",
-    category: "Birds",
-    name: "Birds",
-    image: "https://images.unsplash.com/photo-1497206365907-f5e630693df0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-    icon: "🐦",
-    petCount: 0
-  },
-  {
-    _id: "4",
-    category: "Fish",
-    name: "Fish",
-    image: "https://images.unsplash.com/photo-1524704796725-9fc3044a58b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1171&q=80",
-    icon: "🐠",
-    petCount: 0
-  }
+    {
+        _id: "1",
+        category: "Dogs",
+        name: "Dogs",
+        image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80",
+        icon: "🐶",
+        petCount: 0
+    },
+    {
+        _id: "2",
+        category: "Cats",
+        name: "Cats",
+        image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1143&q=80",
+        icon: "🐱",
+        petCount: 0
+    },
+    {
+        _id: "3",
+        category: "Birds",
+        name: "Birds",
+        image: "https://images.unsplash.com/photo-1497206365907-f5e630693df0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+        icon: "🐦",
+        petCount: 0
+    },
+    {
+        _id: "4",
+        category: "Fish",
+        name: "Fish",
+        image: "https://images.unsplash.com/photo-1524704796725-9fc3044a58b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1171&q=80",
+        icon: "🐠",
+        petCount: 0
+    }
 ];
 
 const Home = () => {
     const { petCounts, loading: petCountLoading, fetchPetCounts } = usePetCount();
-    
+
     const { data: petsCategory, isLoading, isError, refetch } = useQuery({
         queryKey: ['petCategories'],
         queryFn: fetchPetCategories,
@@ -65,18 +65,18 @@ const Home = () => {
                         name: cat.name || cat.category || 'Unknown',
                         image: cat.image || `https://placehold.co/600x400?text=${encodeURIComponent(cat.category || cat.name || 'Pet')}`,
                         icon: cat.icon || '🐾',
-                        petCount: petCounts[cat.category?.toLowerCase()] !== undefined 
-                          ? petCounts[cat.category?.toLowerCase()] 
-                          : (cat.petCount || 0),
+                        petCount: petCounts[cat.category?.toLowerCase()] !== undefined
+                            ? petCounts[cat.category?.toLowerCase()]
+                            : (cat.petCount || 0),
                         slug: cat.slug || (cat.category || '').toLowerCase(),
                     }));
-                    
+
                     // Filter to show only 4 main categories: Dogs, Cats, Birds, Fish
                     const mainCategories = ['Dogs', 'Cats', 'Birds', 'Fish'];
-                    const filteredCategories = processedCategories.filter(cat => 
+                    const filteredCategories = processedCategories.filter(cat =>
                         mainCategories.includes(cat.category)
                     );
-                    
+
                     return filteredCategories;
                 }
             } catch (error) {
@@ -105,11 +105,11 @@ const Home = () => {
     if (isError) {
         console.error("Failed to fetch pet categories. Falling back to default data.");
     }
-    
+
     return (
         <>
             <Banner />
-            
+
             <main className="flex-grow">
                 {/* Pet Categories Section */}
                 <section className="py-20 bg-gradient-to-b from-white to-gray-50">
@@ -120,12 +120,12 @@ const Home = () => {
                                 <span className="bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent"> Companion</span>
                             </h2>
                             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                                Browse through our carefully curated pet categories and discover amazing animals 
+                                Browse through our carefully curated pet categories and discover amazing animals
                                 waiting for their forever homes
                             </p>
                         </div>
-                        
-                        {petsCategory.length > 0 ? (
+
+                        {petsCategory && petsCategory.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {petsCategory.map(category => (
                                     <PetCategory key={category._id} card={category} />
@@ -142,7 +142,7 @@ const Home = () => {
                         )}
                     </div>
                 </section>
-                
+
                 <Action />
                 <AboutUs />
                 <Inspiration />
