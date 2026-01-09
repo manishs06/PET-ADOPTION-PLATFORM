@@ -1,71 +1,72 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Category = require('../models/Category');
+const Pet = require('../models/Pet');
 
 const router = express.Router();
 
 // Pet categories data with all required fields
 const petCategories = [
-  { 
-    _id: '1', 
-    category: 'Dogs', 
+  {
+    _id: '1',
+    category: 'Dogs',
     name: 'Dogs',
-    icon: '🐶', 
-    slug: 'dogs', 
+    icon: '🐶',
+    slug: 'dogs',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80'
   },
-  { 
-    _id: '2', 
+  {
+    _id: '2',
     category: 'Cats',
     name: 'Cats',
-    icon: '🐱', 
-    slug: 'cats', 
+    icon: '🐱',
+    slug: 'cats',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1143&q=80'
   },
-  { 
-    _id: '3', 
+  {
+    _id: '3',
     category: 'Birds',
     name: 'Birds',
-    icon: '🐦', 
-    slug: 'birds', 
+    icon: '🐦',
+    slug: 'birds',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1497206365907-f5e630693df0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
   },
-  { 
-    _id: '4', 
+  {
+    _id: '4',
     category: 'Fish',
     name: 'Fish',
-    icon: '🐠', 
-    slug: 'fish', 
+    icon: '🐠',
+    slug: 'fish',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1524704796725-9fc3044a58b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1171&q=80'
   },
-  { 
-    _id: '5', 
+  {
+    _id: '5',
     category: 'Rabbits',
     name: 'Rabbits',
-    icon: '🐰', 
-    slug: 'rabbits', 
+    icon: '🐰',
+    slug: 'rabbits',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1133&q=80'
   },
-  { 
-    _id: '6', 
+  {
+    _id: '6',
     category: 'Hamsters',
     name: 'Hamsters',
-    icon: '🐹', 
-    slug: 'hamsters', 
+    icon: '🐹',
+    slug: 'hamsters',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1511047103917-3f7b8f9e0b5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
   },
-  { 
-    _id: '7', 
+  {
+    _id: '7',
     category: 'Other',
     name: 'Other',
-    icon: '🐾', 
-    slug: 'other', 
+    icon: '🐾',
+    slug: 'other',
     petCount: 0,
     image: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1159&q=80'
   }
@@ -75,7 +76,6 @@ const petCategories = [
 router.get('/pet-categories', async (req, res) => {
   try {
     // Get pet counts from the database
-    const Pet = require('../models/Pet');
     const petCounts = await Pet.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } }
     ]);
@@ -116,19 +116,18 @@ router.get('/pet-categories', async (req, res) => {
 router.get('/pet-categories/:id', async (req, res) => {
   try {
     const category = petCategories.find(cat => cat._id === req.params.id);
-    
+
     if (!category) {
       return res.status(404).json({
         success: false,
         message: 'Category not found'
       });
     }
-    
+
     // Get pet count for this category from the database
     try {
-      const Pet = require('../models/Pet');
-      const petCount = await Pet.countDocuments({ category: category.category });
-      
+      const petCount = await Pet.countDocuments({ category: category.category.toLowerCase() });
+
       res.status(200).json({
         success: true,
         data: {
@@ -157,17 +156,17 @@ router.get('/pet-categories/:id', async (req, res) => {
 // Get pet category by name (legacy route)
 router.get('/pet-categories/category/:name', (req, res) => {
   try {
-    const category = petCategories.find(cat => 
+    const category = petCategories.find(cat =>
       cat.category.toLowerCase() === req.params.name.toLowerCase()
     );
-    
+
     if (!category) {
       return res.status(404).json({
         success: false,
         message: 'Category not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: category
@@ -233,9 +232,9 @@ router.get('/:id', async (req, res) => {
 // Get category by slug
 router.get('/slug/:slug', async (req, res) => {
   try {
-    const category = await Category.findOne({ 
+    const category = await Category.findOne({
       slug: req.params.slug,
-      isActive: true 
+      isActive: true
     });
 
     if (!category) {

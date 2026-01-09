@@ -49,25 +49,38 @@ app.use('/api/', limiter);
 
 // CORS configuration
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173').split(',').map(origin => origin.trim());
+
+// Also include FRONTEND_URL if specified
+if (process.env.FRONTEND_URL) {
+  const frontendUrl = process.env.FRONTEND_URL.trim();
+  if (!allowedOrigins.includes(frontendUrl)) {
+    allowedOrigins.push(frontendUrl);
+  }
+}
+
+console.log('Allowed Origins:', allowedOrigins);
+
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // In production, be more strict; in development, allow localhost
-    if (process.env.NODE_ENV === 'production') {
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+    // Dynamic check for production origins
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      // Direct match
+      if (allowedOrigin === origin) return true;
+      // Also allow any onrender.com subdomains if the user is using them
+      if (origin.endsWith('.onrender.com') && origin.includes('pet-adoption-platform')) return true;
+      return false;
+    });
+
+    if (isAllowed || process.env.NODE_ENV !== 'production' || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      callback(null, true);
     } else {
-      // Development: allow localhost and allowed origins
-      if (origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      console.log('CORS blocked for origin:', origin);
+      const corsError = new Error('Not allowed by CORS');
+      corsError.status = 403;
+      callback(corsError);
     }
   },
   credentials: true,
