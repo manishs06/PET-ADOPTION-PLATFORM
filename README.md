@@ -34,3 +34,4 @@ This project is deployed on Render. The frontend is a static site and the backen
 3. Deploy frontend separately (Vercel, Netlify, or as static site)
 4. Update CORS settings in backend to include your frontend URL
 5. Configure MongoDB Atlas for production database
+​
